@@ -1,0 +1,26 @@
+{
+  "name": "paillier-contracts",
+  "version": "1.0.0",
+  "description": "Paillier homomorphic encryption contract",
+  "author": {
+    "name": "lodge",
+    "email": "jay.logelin@gmail.com"
+  },
+  "scripts": {
+    "test": "hardhat test",
+    "clean": "hardhat clean",
+    "deploy:local": "hardhat ignition deploy ./ignition/modules/Lock.ts",
+    "prettier": "prettier --write --plugin=prettier-plugin-solidity 'contracts/Paillier.sol' && npx prettier --write .",
+    "prettier:check": "prettier  --check . --check --plugin=prettier-plugin-solidity 'contracts/Paillier.sol'"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "hardhat": "^2.22.3",
+    "prettier": "^3.2.5",
+    "prettier-plugin-solidity": "^1.3.1"
+  },
+  "dependencies": {
+    "bigint-conversion": "^2.4.3",
+    "paillier-bigint": "^3.4.3"
+  }
+}
