@@ -16,9 +16,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Copy .env.example to .env
-        run: cp .env.example .env
-
       - name: Environment
         uses: actions/setup-node@v3
         with:
