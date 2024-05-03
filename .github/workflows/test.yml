@@ -24,9 +24,6 @@ jobs:
         with:
           node-version: "18.x"
 
-      - name: Copy .env.example to .env
-        run: cp .env.example .env
-
       - name: Run tests
         run: |
           npm install
