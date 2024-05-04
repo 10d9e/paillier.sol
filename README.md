@@ -1,15 +1,19 @@
 # Paillier Solidity Smart Contract
+
 This Solidity smart contract provides functionalities for performing homomorphic encryption using the Paillier cryptosystem on the Ethereum blockchain. Homomorphic encryption allows computations to be performed on encrypted data without decrypting it first, providing privacy and security benefits.
 
 # Features
+
 - Addition of two encrypted values.
 - Multiplication of an encrypted value by a plaintext constant.
 - Encryption of zero.
 
 # Installation
+
 To use this smart contract, you need to deploy it on the Ethereum blockchain. You'll also need to import the BigNumbers.sol library for handling large numbers.
 
 # Usage
+
 1. Deploy the PaillierSolidity contract on the Ethereum blockchain.
 2. Import the contract into your Solidity code.
 3. Use the provided functions to perform homomorphic encryption operations.
@@ -19,6 +23,7 @@ To use this smart contract, you need to deploy it on the Ethereum blockchain. Yo
 The Paillier cryptosystem, which is homomorphic with respect to addition and multiplication, can be applied in various blockchain-based applications that require privacy-preserving computation. Here are five possible applications with corresponding example Solidity code snippets:
 
 ## Private Voting System
+
 In a voting system, votes can be encrypted using the Paillier cryptosystem. Each encrypted vote is a ciphertext representing either 0 or 1 (abstention or cast vote). The final tally can be computed without decrypting the individual votes.
 
 ```solidity
@@ -52,6 +57,7 @@ contract PrivateVoting {
 ```
 
 ## Privacy-Preserving Payroll:
+
 Payroll can be computed on-chain while preserving employees' salary privacy. Each employee's encrypted salary can be stored, and payroll totals can be computed without revealing individual salaries.
 
 ```solidity
@@ -86,6 +92,7 @@ contract PrivatePayroll {
 ```
 
 ## Anonymous Donations:
+
 In a charitable donation system, donors' contributions can be kept private. The total amount donated can be computed and verified without revealing individual contributions.
 
 ```solidity
@@ -119,6 +126,7 @@ contract AnonymousDonations {
 ```
 
 ## Private Auction:
+
 In a private auction, bids can be encrypted, and the winner can be determined without revealing other bidders' bid amounts.
 
 ```solidity
@@ -158,6 +166,7 @@ contract PrivateAuction {
 ```
 
 ## Private Tax Calculation:
+
 Tax calculations can be carried out on-chain while keeping individual taxpayers' incomes private. The total tax owed can be computed without revealing individual incomes.
 
 ```solidity
@@ -193,3 +202,7 @@ contract PrivateTaxCalculation {
     }
 }
 ```
+
+# References
+
+https://github.com/jahali6128/paillier-solidity

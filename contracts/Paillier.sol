@@ -3,6 +3,27 @@ pragma solidity ^0.8.24;
 
 import "./BigNum.sol";
 
+/// @title CipherText Struct
+/// @notice A struct to represent an encrypted value
+/// @dev The encrypted value is stored as a byte array
+struct Ciphertext {
+    bytes value;
+}
+
+/// @title PublicKey Struct
+/// @notice A struct to represent a public key
+/// @dev The public key is stored as a byte array
+struct PublicKey {
+    bytes value;
+}
+
+/// @title PrivateKey Struct
+/// @notice A struct to represent a private key
+/// @dev The private key is stored as a byte array
+struct PrivateKey {
+    bytes value;
+}
+
 /// @title Paillier Cryptosystem Implementation
 /// @author The developer
 /// @notice This contract provides basic operations for the Paillier cryptosystem
@@ -17,17 +38,25 @@ contract Paillier {
     /// @param publicKey The public key in bytes
     /// @return enc_sum The encrypted sum as a BigNumber
     function add(
-        bytes calldata a,
-        bytes calldata b,
-        bytes calldata publicKey
+        Ciphertext calldata a,
+        Ciphertext calldata b,
+        PublicKey calldata publicKey
     ) public view returns (BigNumber memory) {
         // Create BigNumber representations for the encrypted values and the public key
-        BigNumber memory enc_a = BigNumber(a, false, BigNum.bitLength(a));
-        BigNumber memory enc_b = BigNumber(b, false, BigNum.bitLength(b));
-        BigNumber memory pub_n = BigNumber(
-            publicKey,
+        BigNumber memory enc_a = BigNumber(
+            a.value,
             false,
-            BigNum.bitLength(publicKey)
+            BigNum.bitLength(a.value)
+        );
+        BigNumber memory enc_b = BigNumber(
+            b.value,
+            false,
+            BigNum.bitLength(b.value)
+        );
+        BigNumber memory pub_n = BigNumber(
+            publicKey.value,
+            false,
+            BigNum.bitLength(publicKey.value)
         );
 
         // Calculate the encrypted sum as enc_a * enc_b % pub_n^2
@@ -46,16 +75,20 @@ contract Paillier {
     /// @param publicKey The public key in bytes
     /// @return enc_result The encrypted result as a BigNumber
     function mul(
-        bytes calldata a,
+        Ciphertext calldata a,
         uint256 b,
-        bytes calldata publicKey
+        PublicKey calldata publicKey
     ) public view returns (BigNumber memory) {
         // Create BigNumber representations for the encrypted value and the public key
-        BigNumber memory enc_value = BigNumber(a, false, BigNum.bitLength(a));
-        BigNumber memory pub_n = BigNumber(
-            publicKey,
+        BigNumber memory enc_value = BigNumber(
+            a.value,
             false,
-            BigNum.bitLength(publicKey)
+            BigNum.bitLength(a.value)
+        );
+        BigNumber memory pub_n = BigNumber(
+            publicKey.value,
+            false,
+            BigNum.bitLength(publicKey.value)
         );
 
         // Calculate the encrypted result as enc_value^b % pub_n^2
@@ -74,14 +107,14 @@ contract Paillier {
     /// @return enc_zero The encrypted zero as a BigNumber
     function encryptZero(
         bytes calldata rnd,
-        bytes calldata publicKey
+        PublicKey calldata publicKey
     ) public view returns (BigNumber memory) {
         // Create BigNumber representations for the random value and the public key
         BigNumber memory rand = BigNumber(rnd, false, BigNum.bitLength(rnd));
         BigNumber memory pub_n = BigNumber(
-            publicKey,
+            publicKey.value,
             false,
-            BigNum.bitLength(publicKey)
+            BigNum.bitLength(publicKey.value)
         );
 
         // Calculate the encrypted zero as r^n % n^2
@@ -100,25 +133,25 @@ contract Paillier {
     /// @param publicKey The public key in bytes
     /// @return decryptedValue The decrypted value as a BigNumber
     function decrypt(
-        bytes calldata encValue,
-        bytes calldata privateKey,
-        bytes calldata publicKey
+        Ciphertext calldata encValue,
+        PrivateKey calldata privateKey,
+        PublicKey calldata publicKey
     ) public view returns (BigNumber memory) {
         // Create BigNumber representations for the encrypted value, private key, and public key
         BigNumber memory enc_value = BigNumber(
-            encValue,
+            encValue.value,
             false,
-            BigNum.bitLength(encValue)
+            BigNum.bitLength(encValue.value)
         );
         BigNumber memory lambda = BigNumber(
-            privateKey,
+            privateKey.value,
             false,
-            BigNum.bitLength(privateKey)
+            BigNum.bitLength(privateKey.value)
         );
         BigNumber memory n = BigNumber(
-            publicKey,
+            publicKey.value,
             false,
-            BigNum.bitLength(publicKey)
+            BigNum.bitLength(publicKey.value)
         );
 
         // Decrypt the value using private key lambda
