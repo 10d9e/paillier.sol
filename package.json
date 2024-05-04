@@ -1,6 +1,6 @@
 {
   "name": "paillier-contracts",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Paillier homomorphic encryption contract",
   "license": "The Unlicense",
   "author": {
@@ -10,7 +10,7 @@
   "scripts": {
     "test": "hardhat test",
     "clean": "hardhat clean",
-    "deploy:local": "hardhat ignition deploy ./ignition/modules/Lock.ts",
+    "deploy:local": "hardhat ignition deploy ./ignition/modules/PaillierModule.ts",
     "prettier": "prettier --write --plugin=prettier-plugin-solidity 'contracts/Paillier.sol' && npx prettier --write .",
     "prettier:check": "prettier  --check . --check --plugin=prettier-plugin-solidity 'contracts/Paillier.sol'"
   },
