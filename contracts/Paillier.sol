@@ -189,7 +189,6 @@ contract Paillier {
         uint256 b,
         PublicKey calldata publicKey
     ) public view returns (BigNumber memory) {
-        // Create BigNumber representations for the encrypted value and the public key
         BigNumber memory enc_value = BigNumber(
             a.value,
             false,
