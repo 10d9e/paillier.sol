@@ -1,6 +1,6 @@
 {
   "name": "paillier-contracts",
-  "version": "1.0.4",
+  "version": "1.1.0",
   "description": "Paillier homomorphic encryption contract",
   "license": "The Unlicense",
   "author": {

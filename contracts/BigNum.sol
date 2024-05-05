@@ -16,9 +16,9 @@ library BigNum {
     /// @notice the value for number 0 of a BigNumber instance.
     bytes constant ZERO = hex"0000000000000000000000000000000000000000000000000000000000000000";
     /// @notice the value for number 1 of a BigNumber instance.
-    bytes constant  ONE = hex"0000000000000000000000000000000000000000000000000000000000000001";
+    bytes constant ONE = hex"0000000000000000000000000000000000000000000000000000000000000001";
     /// @notice the value for number 2 of a BigNumber instance.
-    bytes constant  TWO = hex"0000000000000000000000000000000000000000000000000000000000000002";
+    bytes constant TWO = hex"0000000000000000000000000000000000000000000000000000000000000002";
 
     // ***************** BEGIN EXPOSED MANAGEMENT FUNCTIONS ******************
     /** @notice verify a BN instance
