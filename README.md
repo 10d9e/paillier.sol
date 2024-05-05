@@ -5,7 +5,10 @@ This Solidity smart contract provides functionalities for performing homomorphic
 # Features
 
 - Addition of two encrypted values.
+- Subtraction of two encrypted values.
 - Multiplication of an encrypted value by a plaintext constant.
+- Subtraction of a plaintext constant from an encrypted value.
+- Addition of an encrypted value with a plaintext value.
 - Encryption of zero.
 
 # Installation
