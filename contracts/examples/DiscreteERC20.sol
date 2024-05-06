@@ -115,39 +115,6 @@ contract DiscreteERC20 {
         return true;
     }
 
-    /// @notice Approves a spender to use a specified amount of the owner's tokens
-    /// @param spender The address authorized to spend the tokens
-    /// @param amount The amount of tokens they are authorized to use, represented as encrypted data
-    /// @return success A boolean value indicating success of the approval
-    function approve(
-        address spender,
-        Ciphertext calldata amount
-    ) external returns (bool success) {
-        allowance[msg.sender][spender] = amount;
-        emit Approval(msg.sender, spender, amount);
-        return true;
-    }
-
-    /// @notice Transfers tokens from one address to another using an allowance
-    /// @param sender The address from which tokens are transferred
-    /// @param recipient The address to which tokens are transferred
-    /// @param amount The amount of tokens to transfer, represented as encrypted data
-    /// @return success A boolean value indicating success of the transfer
-    function transferFrom(
-        address sender,
-        address recipient,
-        Ciphertext calldata amount
-    ) external returns (bool success) {
-        allowance[sender][msg.sender] = this._sub(
-            allowance[sender][msg.sender],
-            amount
-        );
-        balanceOf[sender] = this._sub(balanceOf[sender], amount);
-        balanceOf[recipient] = this._add(balanceOf[recipient], amount);
-        emit Transfer(sender, recipient, amount);
-        return true;
-    }
-
     /// @dev Internal function to mint new encrypted tokens
     /// @param to The address to receive the newly minted tokens
     /// @param amount The amount of tokens to mint, represented as encrypted data
