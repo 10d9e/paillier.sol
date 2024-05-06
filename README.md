@@ -23,7 +23,11 @@ To use this smart contract, you need to deploy it on the Ethereum blockchain. Yo
 
 # Use Cases
 
-The Paillier cryptosystem, which is homomorphic with respect to addition and multiplication, can be applied in various blockchain-based applications that require privacy-preserving computation. Here are five possible applications with corresponding example Solidity code snippets:
+The Paillier cryptosystem, which is homomorphic with respect to addition and multiplication, can be applied in various blockchain-based applications that require privacy-preserving computation. 
+
+Included is a comprehensive [DiscreteERC20](contracts/examples/DiscreteERC20.sol) contract, demonstrating the library's homomorphic properties with an Ethereum Token, preserving transaction privacy onchain.
+
+Here are five possible applications with corresponding example Solidity code snippets:
 
 ## Private Voting System
 

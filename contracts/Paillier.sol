@@ -209,13 +209,52 @@ contract Paillier {
         return enc_result;
     }
 
+    function div_const(
+        Ciphertext calldata a,
+        uint256 b,
+        PublicKey calldata publicKey
+    ) public view returns (BigNumber memory) {
+        BigNumber memory enc_value = BigNumber(
+            a.value,
+            false,
+            BigNum.bitLength(a.value)
+        );
+        BigNumber memory pub_n = BigNumber(
+            publicKey.n,
+            true,
+            BigNum.bitLength(publicKey.n)
+        );
+
+        BigNumber memory bb = BigNumber(abi.encodePacked(b), false, 256);
+        BigNumber memory bi = BigNumber(abi.encodePacked(b), false, 256);
+
+        BigNumber memory modulus = BigNum.pow(pub_n, 2);
+
+        // BigNumber memory inverse = BigNum.mod(BigNum.mod(bb, pub_n), modulus);
+
+        // Fermat's Little Theorem: a^(p-1) ≡ 1 (mod p)
+        // Therefore, a^(p-2) is the modular inverse of a mod p
+        //return pow(a, p - 2, p)
+        // ciphertext.modPow(plaintext, public_key.modulus);
+        BigNumber memory inverse = BigNum.modexp(bb, bi, pub_n, modulus);
+
+        // Calculate the encrypted result as enc_value^b % pub_n^2
+        BigNumber memory enc_result = BigNum.modexp(
+            enc_value,
+            inverse,
+            modulus
+        );
+
+        return enc_result;
+    }
+
     /// @notice Encrypts zero using a random value and a public key
     /// @dev The encryption is performed as r^n % n^2, where r is the random value
     /// @param rnd The random value in bytes
     /// @param publicKey The public key in bytes
     /// @return enc_zero The encrypted zero as a BigNumber
     function encryptZero(
-        bytes calldata rnd,
+        bytes memory rnd,
         PublicKey calldata publicKey
     ) public view returns (BigNumber memory) {
         // Create BigNumber representations for the random value and the public key
