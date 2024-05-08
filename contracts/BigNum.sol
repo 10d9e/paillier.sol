@@ -38,6 +38,16 @@ library BigNum {
         else require((bn.val.length % 32 == 0) && (msword>>((bn.bitlen%256)-1)==1));
     }
 
+     // convert BigNum to uint
+    function toUint(BigNumber memory a) internal pure returns(uint) {
+        require(a.bitlen <= 256);
+        uint result;
+        assembly {
+            result := mload(add(a, 0x20))
+        }
+        return result;
+    }
+
     /** @notice initialize a BN instance
      *  @dev wrapper function for _init. initializes from bytes value.
      *       Allows passing bitLength of value. This is NOT verified in the internal function. Only use where bitlen is

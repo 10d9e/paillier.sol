@@ -1,12 +1,14 @@
-import { HardhatUserConfig } from "hardhat/config";
-import "@nomicfoundation/hardhat-toolbox";
-require("@nomicfoundation/hardhat-chai-matchers");
+import '@nomicfoundation/hardhat-ethers';
+import '@nomicfoundation/hardhat-toolbox';
+import { HardhatUserConfig } from 'hardhat/config';
+
+require('@nomicfoundation/hardhat-chai-matchers');
 
 const mnemonic: string =
-  "adapt mosquito move limb mobile illegal tree voyage juice mosquito burger raise father hope layer";
+  'adapt mosquito move limb mobile illegal tree voyage juice mosquito burger raise father hope layer';
 const config: HardhatUserConfig = {
-  solidity: "0.8.25",
-  defaultNetwork: "hardhat",
+  solidity: '0.8.25',
+  defaultNetwork: 'hardhat',
   networks: {
     hardhat: {
       accounts: {

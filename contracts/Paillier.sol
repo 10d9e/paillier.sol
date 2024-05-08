@@ -22,7 +22,8 @@ struct PublicKey {
 /// @notice A struct to represent a private key
 /// @dev The private key is stored as a byte array
 struct PrivateKey {
-    bytes value;
+    bytes lambda;
+    bytes mu;
 }
 
 /// @title Paillier Cryptosystem Implementation
@@ -44,28 +45,12 @@ contract Paillier {
         PublicKey calldata publicKey
     ) public view returns (BigNumber memory) {
         // Create BigNumber representations for the encrypted values and the public key
-        BigNumber memory enc_a = BigNumber(
-            a.value,
-            false,
-            BigNum.bitLength(a.value)
-        );
-        BigNumber memory enc_b = BigNumber(
-            b.value,
-            false,
-            BigNum.bitLength(b.value)
-        );
-        BigNumber memory pub_n = BigNumber(
-            publicKey.n,
-            false,
-            BigNum.bitLength(publicKey.n)
-        );
+        BigNumber memory enc_a = BigNumber(a.value, false, BigNum.bitLength(a.value));
+        BigNumber memory enc_b = BigNumber(b.value, false, BigNum.bitLength(b.value));
+        BigNumber memory pub_n = BigNumber(publicKey.n, false, BigNum.bitLength(publicKey.n));
 
         // Calculate the encrypted sum as enc_a * enc_b % pub_n^2
-        BigNumber memory enc_sum = BigNum.mod(
-            BigNum.mul(enc_a, enc_b),
-            BigNum.pow(pub_n, 2)
-        );
-
+        BigNumber memory enc_sum = BigNum.mod(BigNum.mul(enc_a, enc_b), BigNum.pow(pub_n, 2));
         return enc_sum;
     }
 
@@ -80,25 +65,10 @@ contract Paillier {
         uint256 b,
         PublicKey calldata publicKey
     ) public view returns (BigNumber memory) {
-        BigNumber memory enc_a = BigNumber(
-            a.value,
-            false,
-            BigNum.bitLength(a.value)
-        );
-        BigNumber memory pub_n = BigNumber(
-            publicKey.n,
-            false,
-            BigNum.bitLength(publicKey.n)
-        );
-        BigNumber memory g = BigNumber(
-            publicKey.g,
-            false,
-            BigNum.bitLength(publicKey.g)
-        );
-        BigNumber memory enc_result = BigNum.mod(
-            BigNum.mul(enc_a, BigNum.pow(g, b)),
-            BigNum.pow(pub_n, 2)
-        );
+        BigNumber memory enc_a = BigNumber(a.value, false, BigNum.bitLength(a.value));
+        BigNumber memory pub_n = BigNumber(publicKey.n, false, BigNum.bitLength(publicKey.n));
+        BigNumber memory g = BigNumber(publicKey.g, false, BigNum.bitLength(publicKey.g));
+        BigNumber memory enc_result = BigNum.mod(BigNum.mul(enc_a, BigNum.pow(g, b)), BigNum.pow(pub_n, 2));
 
         return enc_result;
     }
@@ -114,28 +84,12 @@ contract Paillier {
         Ciphertext calldata b,
         PublicKey calldata publicKey
     ) public view returns (BigNumber memory) {
-        BigNumber memory enc_a = BigNumber(
-            a.value,
-            false,
-            BigNum.bitLength(a.value)
-        );
-        BigNumber memory enc_b = BigNumber(
-            b.value,
-            false,
-            BigNum.bitLength(b.value)
-        );
-        BigNumber memory pub_n = BigNumber(
-            publicKey.n,
-            false,
-            BigNum.bitLength(publicKey.n)
-        );
+        BigNumber memory enc_a = BigNumber(a.value, false, BigNum.bitLength(a.value));
+        BigNumber memory enc_b = BigNumber(b.value, false, BigNum.bitLength(b.value));
+        BigNumber memory pub_n = BigNumber(publicKey.n, false, BigNum.bitLength(publicKey.n));
 
         BigNumber memory modulus = BigNum.pow(pub_n, 2);
-        BigNumber memory neg_enc_b = BigNum.modexp(
-            enc_b,
-            BigNum.sub(pub_n, BigNum.one()),
-            modulus
-        );
+        BigNumber memory neg_enc_b = BigNum.modexp(enc_b, BigNum.sub(pub_n, BigNum.one()), modulus);
 
         BigNumber memory enc_result = BigNum.mod(enc_a.mul(neg_enc_b), modulus);
         return enc_result;
@@ -152,28 +106,14 @@ contract Paillier {
         int256 b,
         PublicKey calldata publicKey
     ) public view returns (BigNumber memory) {
-        BigNumber memory enc_a = BigNumber(
-            a.value,
-            false,
-            BigNum.bitLength(a.value)
-        );
-        BigNumber memory pub_n = BigNumber(
-            publicKey.n,
-            false,
-            BigNum.bitLength(publicKey.n)
-        );
-        BigNumber memory g = BigNumber(
-            publicKey.g,
-            false,
-            BigNum.bitLength(publicKey.g)
-        );
+        BigNumber memory enc_a = BigNumber(a.value, false, BigNum.bitLength(a.value));
+        BigNumber memory pub_n = BigNumber(publicKey.n, false, BigNum.bitLength(publicKey.n));
+        BigNumber memory g = BigNumber(publicKey.g, false, BigNum.bitLength(publicKey.g));
 
         BigNumber memory bb = BigNumber(abi.encodePacked(b), true, 256);
         BigNumber memory inverse = BigNum.mod(bb, pub_n);
         BigNumber memory modulus = BigNum.pow(pub_n, 2);
-        BigNumber memory enc_result = enc_a
-            .mul(BigNum.modexp(g, inverse, modulus))
-            .mod(modulus);
+        BigNumber memory enc_result = enc_a.mul(BigNum.modexp(g, inverse, modulus)).mod(modulus);
 
         return enc_result;
     }
@@ -189,22 +129,11 @@ contract Paillier {
         uint256 b,
         PublicKey calldata publicKey
     ) public view returns (BigNumber memory) {
-        BigNumber memory enc_value = BigNumber(
-            a.value,
-            false,
-            BigNum.bitLength(a.value)
-        );
-        BigNumber memory pub_n = BigNumber(
-            publicKey.n,
-            false,
-            BigNum.bitLength(publicKey.n)
-        );
+        BigNumber memory enc_value = BigNumber(a.value, false, BigNum.bitLength(a.value));
+        BigNumber memory pub_n = BigNumber(publicKey.n, false, BigNum.bitLength(publicKey.n));
 
         // Calculate the encrypted result as enc_value^b % pub_n^2
-        BigNumber memory enc_result = BigNum.mod(
-            BigNum.pow(enc_value, b),
-            BigNum.pow(pub_n, 2)
-        );
+        BigNumber memory enc_result = BigNum.mod(BigNum.pow(enc_value, b), BigNum.pow(pub_n, 2));
 
         return enc_result;
     }
@@ -214,36 +143,18 @@ contract Paillier {
         uint256 b,
         PublicKey calldata publicKey
     ) public view returns (BigNumber memory) {
-        BigNumber memory enc_value = BigNumber(
-            a.value,
-            false,
-            BigNum.bitLength(a.value)
-        );
-        BigNumber memory pub_n = BigNumber(
-            publicKey.n,
-            true,
-            BigNum.bitLength(publicKey.n)
-        );
-
+        BigNumber memory enc_value = BigNumber(a.value, false, BigNum.bitLength(a.value));
+        BigNumber memory pub_n = BigNumber(publicKey.n, true, BigNum.bitLength(publicKey.n));
         BigNumber memory bb = BigNumber(abi.encodePacked(b), false, 256);
         BigNumber memory bi = BigNumber(abi.encodePacked(b), false, 256);
-
         BigNumber memory modulus = BigNum.pow(pub_n, 2);
-
-        // BigNumber memory inverse = BigNum.mod(BigNum.mod(bb, pub_n), modulus);
 
         // Fermat's Little Theorem: a^(p-1) ≡ 1 (mod p)
         // Therefore, a^(p-2) is the modular inverse of a mod p
-        //return pow(a, p - 2, p)
-        // ciphertext.modPow(plaintext, public_key.modulus);
         BigNumber memory inverse = BigNum.modexp(bb, bi, pub_n, modulus);
 
         // Calculate the encrypted result as enc_value^b % pub_n^2
-        BigNumber memory enc_result = BigNum.modexp(
-            enc_value,
-            inverse,
-            modulus
-        );
+        BigNumber memory enc_result = BigNum.modexp(enc_value, inverse, modulus);
 
         return enc_result;
     }
@@ -253,65 +164,40 @@ contract Paillier {
     /// @param rnd The random value in bytes
     /// @param publicKey The public key in bytes
     /// @return enc_zero The encrypted zero as a BigNumber
-    function encryptZero(
-        bytes memory rnd,
-        PublicKey calldata publicKey
-    ) public view returns (BigNumber memory) {
+    function encryptZero(bytes memory rnd, PublicKey calldata publicKey) public view returns (BigNumber memory) {
         // Create BigNumber representations for the random value and the public key
         BigNumber memory rand = BigNumber(rnd, false, BigNum.bitLength(rnd));
-        BigNumber memory pub_n = BigNumber(
-            publicKey.n,
-            false,
-            BigNum.bitLength(publicKey.n)
-        );
+        BigNumber memory pub_n = BigNumber(publicKey.n, false, BigNum.bitLength(publicKey.n));
 
         // Calculate the encrypted zero as r^n % n^2
-        BigNumber memory enc_zero = BigNum.mod(
-            BigNum.mul(rand, pub_n),
-            BigNum.pow(pub_n, 2)
-        );
+        BigNumber memory enc_zero = BigNum.mod(BigNum.mul(rand, pub_n), BigNum.pow(pub_n, 2));
 
         return enc_zero;
     }
 
     /// @notice Decrypts an encrypted value using a private key and a public key
-    /// @dev The decryption is performed as (c^lambda % n^2) % n, where lambda is the private key
+    /// @dev The decryption is performed as (c^lambda % n^2) % n, where lambda is the private key (c^(lambda) % n^2) * mu) % n
     /// @param encValue The encrypted value in bytes
     /// @param privateKey The private key in bytes
     /// @param publicKey The public key in bytes
     /// @return decryptedValue The decrypted value as a BigNumber
     function decrypt(
         Ciphertext calldata encValue,
+        PublicKey calldata publicKey,
         PrivateKey calldata privateKey,
-        PublicKey calldata publicKey
+        bytes calldata sigma
     ) public view returns (BigNumber memory) {
         // Create BigNumber representations for the encrypted value, private key, and public key
-        BigNumber memory enc_value = BigNumber(
-            encValue.value,
-            false,
-            BigNum.bitLength(encValue.value)
-        );
-        BigNumber memory lambda = BigNumber(
-            privateKey.value,
-            false,
-            BigNum.bitLength(privateKey.value)
-        );
-        BigNumber memory n = BigNumber(
-            publicKey.n,
-            false,
-            BigNum.bitLength(publicKey.n)
-        );
+        BigNumber memory enc_value = BigNumber(encValue.value, false, BigNum.bitLength(encValue.value));
+        BigNumber memory lambda = BigNumber(privateKey.lambda, false, BigNum.bitLength(privateKey.lambda));
+        BigNumber memory mu = BigNumber(privateKey.mu, false, BigNum.bitLength(privateKey.mu));
+        BigNumber memory n = BigNumber(publicKey.n, false, BigNum.bitLength(publicKey.n));
+        BigNumber memory sig = BigNumber(sigma, false, BigNum.bitLength(sigma));
 
-        // Decrypt the value using private key lambda
-        BigNumber memory decryptedValue = BigNum.modexp(
-            enc_value,
-            lambda,
-            BigNum.pow(n, 2)
-        );
+        BigNumber memory alpha = BigNum.modexp(enc_value, lambda, BigNum.pow(n, 2));
 
-        // Modulo operation to ensure the result is within range
-        decryptedValue = BigNum.mod(decryptedValue, n);
-
-        return decryptedValue;
+        // precompute the div operation and verify the sigma
+        require(BigNum.divVerify(alpha, n, sig), "Invalid sigma");
+        return BigNum.mod(BigNum.mul(sig, mu), n);
     }
 }

@@ -23,7 +23,7 @@ To use this smart contract, you need to deploy it on the Ethereum blockchain. Yo
 
 # Use Cases
 
-The Paillier cryptosystem, which is homomorphic with respect to addition and multiplication, can be applied in various blockchain-based applications that require privacy-preserving computation. 
+The Paillier cryptosystem, which is homomorphic with respect to addition and multiplication, can be applied in various blockchain-based applications that require privacy-preserving computation.
 
 Included is a comprehensive [DiscreteERC20](contracts/examples/DiscreteERC20.sol) contract, demonstrating the library's homomorphic properties with an Ethereum Token, preserving transaction privacy onchain.
 
@@ -40,26 +40,26 @@ pragma solidity ^0.8.24;
 import "./Paillier.sol";
 
 contract PrivateVoting {
-    Paillier public paillier;
-    address public owner;
-    BigNumber[] public encryptedVotes;
+  Paillier public paillier;
+  address public owner;
+  BigNumber[] public encryptedVotes;
 
-    constructor(address _paillier) {
-        paillier = Paillier(_paillier);
-        owner = msg.sender;
-    }
+  constructor(address _paillier) {
+    paillier = Paillier(_paillier);
+    owner = msg.sender;
+  }
 
-    function submitVote(bytes calldata vote, bytes calldata publicKey) public {
-        encryptedVotes.push(BigNumber(vote, false, BigNum.bitLength(vote)));
-    }
+  function submitVote(bytes calldata vote, bytes calldata publicKey) public {
+    encryptedVotes.push(BigNumber(vote, false, BigNum.bitLength(vote)));
+  }
 
-    function tallyVotes(bytes calldata publicKey) public view returns (BigNumber memory) {
-        BigNumber memory total = encryptedVotes[0];
-        for (uint256 i = 1; i < encryptedVotes.length; i++) {
-            total = paillier.add(total.toBytes(), encryptedVotes[i].toBytes(), publicKey);
-        }
-        return total;
+  function tallyVotes(bytes calldata publicKey) public view returns (BigNumber memory) {
+    BigNumber memory total = encryptedVotes[0];
+    for (uint256 i = 1; i < encryptedVotes.length; i++) {
+      total = paillier.add(total.toBytes(), encryptedVotes[i].toBytes(), publicKey);
     }
+    return total;
+  }
 }
 ```
 
@@ -109,26 +109,26 @@ pragma solidity ^0.8.24;
 import "./Paillier.sol";
 
 contract AnonymousDonations {
-    Paillier public paillier;
-    address public owner;
-    BigNumber[] public encryptedDonations;
+  Paillier public paillier;
+  address public owner;
+  BigNumber[] public encryptedDonations;
 
-    constructor(address _paillier) {
-        paillier = Paillier(_paillier);
-        owner = msg.sender;
-    }
+  constructor(address _paillier) {
+    paillier = Paillier(_paillier);
+    owner = msg.sender;
+  }
 
-    function donate(bytes calldata encryptedAmount, bytes calldata publicKey) public {
-        encryptedDonations.push(BigNumber(encryptedAmount, false, BigNum.bitLength(encryptedAmount)));
-    }
+  function donate(bytes calldata encryptedAmount, bytes calldata publicKey) public {
+    encryptedDonations.push(BigNumber(encryptedAmount, false, BigNum.bitLength(encryptedAmount)));
+  }
 
-    function totalDonations(bytes calldata publicKey) public view returns (BigNumber memory) {
-        BigNumber memory total = encryptedDonations[0];
-        for (uint256 i = 1; i < encryptedDonations.length; i++) {
-            total = paillier.add(total.toBytes(), encryptedDonations[i].toBytes(), publicKey);
-        }
-        return total;
+  function totalDonations(bytes calldata publicKey) public view returns (BigNumber memory) {
+    BigNumber memory total = encryptedDonations[0];
+    for (uint256 i = 1; i < encryptedDonations.length; i++) {
+      total = paillier.add(total.toBytes(), encryptedDonations[i].toBytes(), publicKey);
     }
+    return total;
+  }
 }
 ```
 
@@ -143,32 +143,32 @@ pragma solidity ^0.8.24;
 import "./Paillier.sol";
 
 contract PrivateAuction {
-    Paillier public paillier;
-    address public owner;
-    mapping(address => BigNumber) public encryptedBids;
-    address public highestBidder;
-    BigNumber public highestBid;
+  Paillier public paillier;
+  address public owner;
+  mapping(address => BigNumber) public encryptedBids;
+  address public highestBidder;
+  BigNumber public highestBid;
 
-    constructor(address _paillier) {
-        paillier = Paillier(_paillier);
-        owner = msg.sender;
-        highestBid = BigNumber("0", false, 1);
+  constructor(address _paillier) {
+    paillier = Paillier(_paillier);
+    owner = msg.sender;
+    highestBid = BigNumber("0", false, 1);
+  }
+
+  function placeBid(address bidder, bytes calldata encryptedBid, bytes calldata publicKey) public {
+    BigNumber memory currentBid = BigNumber(encryptedBid, false, BigNum.bitLength(encryptedBid));
+    encryptedBids[bidder] = currentBid;
+
+    // Compare the new bid with the highest bid so far
+    if (paillier.compare(currentBid.toBytes(), highestBid.toBytes(), publicKey) > 0) {
+      highestBidder = bidder;
+      highestBid = currentBid;
     }
+  }
 
-    function placeBid(address bidder, bytes calldata encryptedBid, bytes calldata publicKey) public {
-        BigNumber memory currentBid = BigNumber(encryptedBid, false, BigNum.bitLength(encryptedBid));
-        encryptedBids[bidder] = currentBid;
-
-        // Compare the new bid with the highest bid so far
-        if (paillier.compare(currentBid.toBytes(), highestBid.toBytes(), publicKey) > 0) {
-            highestBidder = bidder;
-            highestBid = currentBid;
-        }
-    }
-
-    function getHighestBid() public view returns (address, BigNumber memory) {
-        return (highestBidder, highestBid);
-    }
+  function getHighestBid() public view returns (address, BigNumber memory) {
+    return (highestBidder, highestBid);
+  }
 }
 ```
 

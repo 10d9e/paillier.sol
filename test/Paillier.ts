@@ -1,7 +1,8 @@
-import * as paillierBigint from "paillier-bigint";
-import * as bigIntConversion from "bigint-conversion";
-import { ethers } from "hardhat";
-import { expect } from "chai";
+import * as bigIntConversion from 'bigint-conversion';
+import * as bcu from 'bigint-crypto-utils';
+import { expect } from 'chai';
+import { ethers } from 'hardhat';
+import * as paillierBigint from 'paillier-bigint';
 
 // Public key
 interface PublicKey {
@@ -9,17 +10,26 @@ interface PublicKey {
   g: string;
 }
 
+// Private key
+interface PrivateKey {
+  lambda: string;
+  mu: string;
+}
+
 // Ciphertext
 interface Ciphertext {
   value: string;
 }
 
-describe("Paillier", function () {
-  it("should add 2 ciphertexts", async function () {
-    const Paillier = await ethers.deployContract("Paillier");
+function L(a: bigint, n: bigint): bigint {
+  return (a - 1n) / n;
+}
 
-    const { publicKey, privateKey } =
-      await paillierBigint.generateRandomKeys(256);
+describe('Paillier', function () {
+  it('should add 2 ciphertexts', async function () {
+    const Paillier = await ethers.deployContract('Paillier');
+
+    const { publicKey, privateKey } = await paillierBigint.generateRandomKeys(256);
     const a: bigint = BigInt(1);
     const b: bigint = BigInt(2);
     const enc_a: Ciphertext = {
@@ -43,16 +53,15 @@ describe("Paillier", function () {
 
     // Conversion to int for convenience
     const dec_sum = Number(privateKey.decrypt(enc_sum_int));
-    console.log("Decrypted Sum:", dec_sum);
+    console.log('Decrypted Sum:', dec_sum);
 
     // We want dec_sum to equal 3
     expect(dec_sum).to.equal(3);
   });
 
-  it("should add a ciphertext and plaintext", async function () {
-    const { publicKey, privateKey } =
-      await paillierBigint.generateRandomKeys(256);
-    const Paillier = await ethers.deployContract("Paillier");
+  it('should add a ciphertext and plaintext', async function () {
+    const { publicKey, privateKey } = await paillierBigint.generateRandomKeys(256);
+    const Paillier = await ethers.deployContract('Paillier');
     const a: bigint = BigInt(1);
     const b: bigint = BigInt(2);
     const enc_a = { value: ethers.toBeHex(publicKey.encrypt(a)) };
@@ -66,14 +75,13 @@ describe("Paillier", function () {
     const enc_sum = await Paillier.add_const(enc_a, b, pubKey);
     const enc_sum_int = bigIntConversion.hexToBigint(enc_sum[0]);
     const dec_sum = Number(privateKey.decrypt(enc_sum_int));
-    console.log("Decrypted Sum:", dec_sum);
+    console.log('Decrypted Sum:', dec_sum);
     expect(dec_sum).to.equal(3);
   });
 
-  it("should subtract 2 ciphertexts", async function () {
-    const { publicKey, privateKey } =
-      await paillierBigint.generateRandomKeys(256);
-    const Paillier = await ethers.deployContract("Paillier");
+  it('should subtract 2 ciphertexts', async function () {
+    const { publicKey, privateKey } = await paillierBigint.generateRandomKeys(256);
+    const Paillier = await ethers.deployContract('Paillier');
     const a: bigint = BigInt(5);
     const b: bigint = BigInt(2);
     const enc_a = { value: ethers.toBeHex(publicKey.encrypt(a)) };
@@ -87,14 +95,13 @@ describe("Paillier", function () {
     const enc_diff = await Paillier.sub(enc_a, enc_b, pubKey);
     const enc_diff_int = bigIntConversion.hexToBigint(enc_diff[0]);
     const dec_diff = Number(privateKey.decrypt(enc_diff_int));
-    console.log("Decrypted Difference:", dec_diff);
+    console.log('Decrypted Difference:', dec_diff);
     expect(dec_diff).to.equal(3);
   });
 
-  it("should subtract a ciphertext and plaintext", async function () {
-    const { publicKey, privateKey } =
-      await paillierBigint.generateRandomKeys(256);
-    const Paillier = await ethers.deployContract("Paillier");
+  it('should subtract a ciphertext and plaintext', async function () {
+    const { publicKey, privateKey } = await paillierBigint.generateRandomKeys(256);
+    const Paillier = await ethers.deployContract('Paillier');
     const a: bigint = BigInt(42);
     const b: bigint = BigInt(5);
     const enc_a = { value: ethers.toBeHex(publicKey.encrypt(a)) };
@@ -107,14 +114,13 @@ describe("Paillier", function () {
     const enc_diff = await Paillier.sub_const(enc_a, b, pubKey);
     const enc_diff_int = bigIntConversion.hexToBigint(enc_diff[0]);
     const dec_diff = Number(privateKey.decrypt(enc_diff_int));
-    console.log("Decrypted Difference:", dec_diff);
+    console.log('Decrypted Difference:', dec_diff);
     expect(dec_diff).to.equal(37);
   });
 
-  it("should encrypt zero", async function () {
-    const { publicKey, privateKey } =
-      await paillierBigint.generateRandomKeys(256);
-    const Paillier = await ethers.deployContract("Paillier");
+  it('should encrypt zero', async function () {
+    const { publicKey, privateKey } = await paillierBigint.generateRandomKeys(256);
+    const Paillier = await ethers.deployContract('Paillier');
     // Arbitary random number - 1000000
     const rand = ethers.toBeHex(Math.floor(Math.random() * 1000000));
 
@@ -129,11 +135,10 @@ describe("Paillier", function () {
     expect(dec_zero).to.equal(0);
   });
 
-  it("should multiply encrypted value by a scalar", async function () {
-    const { publicKey, privateKey } =
-      await paillierBigint.generateRandomKeys(256);
+  it('should multiply encrypted value by a scalar', async function () {
+    const { publicKey, privateKey } = await paillierBigint.generateRandomKeys(256);
     const [owner] = await ethers.getSigners();
-    const Paillier = await ethers.deployContract("Paillier");
+    const Paillier = await ethers.deployContract('Paillier');
     const a: bigint = BigInt(2);
     const b: bigint = BigInt(5);
     const enc_a = { value: ethers.toBeHex(publicKey.encrypt(a)) };
@@ -149,29 +154,33 @@ describe("Paillier", function () {
     const enc_scalar_int = bigIntConversion.hexToBigint(enc_scalar[0]);
 
     const dec_scalar = Number(privateKey.decrypt(enc_scalar_int));
-    console.log("Decrypted Scalar:", dec_scalar);
+    console.log('Decrypted Scalar:', dec_scalar);
     expect(dec_scalar).to.equal(10);
   });
 
-  /*
-    it("should divide encrypted value by a scalar", async function () {
-        const { publicKey, privateKey } =
-            await paillierBigint.generateRandomKeys(256);
-        const Paillier = await ethers.deployContract("Paillier");
-        const a: bigint = BigInt(10);
-        const b: bigint = BigInt(2);
-        const enc_a = { value: ethers.toBeHex(publicKey.encrypt(a)) };
+  it('should decrypt a ciphertext', async function () {
+    const { publicKey, privateKey } = await paillierBigint.generateRandomKeys(256);
+    const Paillier = await ethers.deployContract('Paillier');
+    const a: bigint = BigInt(42);
+    const ea: bigint = publicKey.encrypt(a);
+    const enc_a = { value: ethers.toBeHex(ea) };
 
-        // Public key
-        const pubKey: PublicKey = {
-            n: ethers.toBeHex(publicKey.n),
-            g: ethers.toBeHex(publicKey.g),
-        };
-        const enc_scalar = await Paillier.div_const(enc_a, b, pubKey);
-        const enc_scalar_int = bigIntConversion.hexToBigint(enc_scalar[0]);
-        const dec_scalar = Number(privateKey.decrypt(enc_scalar_int));
-        console.log("Decrypted Scalar:", dec_scalar);
-        expect(dec_scalar).to.equal(5);
-    });
-    */
+    // Public key
+    const pubKey: PublicKey = {
+      n: ethers.toBeHex(publicKey.n),
+      g: ethers.toBeHex(publicKey.g),
+    };
+    const privKey: PrivateKey = {
+      lambda: ethers.toBeHex(privateKey.lambda),
+      mu: ethers.toBeHex(privateKey.mu),
+    };
+
+    // decryption is (((c^(lambda) % n^2) - 1) / n) * mu % n
+    // precalculate expensive division operation, verified on the contract
+    let sigma = L(bcu.modPow(ea, privateKey.lambda, publicKey._n2), publicKey.n);
+
+    const dec_a = await Paillier.decrypt(enc_a, pubKey, privKey, ethers.toBeHex(sigma));
+    const dec_a_int = bigIntConversion.hexToBigint(dec_a[0]);
+    expect(dec_a_int).to.equal(42);
+  });
 });

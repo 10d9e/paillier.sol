@@ -3,6 +3,12 @@ pragma solidity ^0.8.24;
 
 import "../Paillier.sol";
 
+struct Secp256k1Ciphertext {
+    bytes iv;
+    bytes ephemPublicKey;
+    bytes ciphertext;
+    bytes mac;
+}
 /// @title DiscreteERC20: An ERC20 token contract with encrypted balances using the Paillier cryptosystem
 /// @dev This contract demonstrates an example of an ERC20 token where balances are encrypted to preserve user privacy.
 contract DiscreteERC20 {
@@ -22,11 +28,7 @@ contract DiscreteERC20 {
     /// @param owner Address owning the tokens
     /// @param spender Address authorized to spend the tokens
     /// @param value Amount of tokens approved, represented as encrypted data
-    event Approval(
-        address indexed owner,
-        address indexed spender,
-        Ciphertext value
-    );
+    event Approval(address indexed owner, address indexed spender, Ciphertext value);
 
     /// @notice An event emitted when a balance request is initiated
     /// @param account Address whose balance is being requested
@@ -35,7 +37,7 @@ contract DiscreteERC20 {
     /// @notice An event emitted in response to a balance request
     /// @param account Address whose balance was requested
     /// @param balance The balance of the account (unencrypted for event)
-    event ResponseBalance(address indexed account, uint balance);
+    event ResponseBalance(address indexed account, Secp256k1Ciphertext balance);
 
     /// @dev The total supply of tokens, encrypted
     Ciphertext public totalSupply;
@@ -84,7 +86,7 @@ contract DiscreteERC20 {
     /// @notice Emits an event with the response balance for a specified address
     /// @param target The address whose balance is being reported
     /// @param balance The balance of the specified address
-    function responseBalance(address target, uint balance) external {
+    function responseBalance(address target, Secp256k1Ciphertext calldata balance) external {
         emit ResponseBalance(target, balance);
     }
 
@@ -92,20 +94,13 @@ contract DiscreteERC20 {
     /// @param recipient The address to receive the tokens
     /// @param amount The amount of tokens to transfer, represented as encrypted data
     /// @return success A boolean value indicating success of the transfer
-    function transfer(
-        address recipient,
-        Ciphertext calldata amount
-    ) external returns (bool success) {
+    function transfer(address recipient, Ciphertext calldata amount) external returns (bool success) {
         require(
-            keccak256(abi.encodePacked(balanceOf[msg.sender].value)) !=
-                keccak256(bytes("")),
+            keccak256(abi.encodePacked(balanceOf[msg.sender].value)) != keccak256(bytes("")),
             "DiscreteERC20: transfer from the zero address"
         );
 
-        if (
-            keccak256(abi.encodePacked(balanceOf[recipient].value)) ==
-            keccak256(bytes(""))
-        ) {
+        if (keccak256(abi.encodePacked(balanceOf[recipient].value)) == keccak256(bytes(""))) {
             balanceOf[recipient] = amount;
         } else {
             balanceOf[recipient] = this._add(balanceOf[recipient], amount);
@@ -119,10 +114,7 @@ contract DiscreteERC20 {
     /// @param to The address to receive the newly minted tokens
     /// @param amount The amount of tokens to mint, represented as encrypted data
     function _mint(address to, Ciphertext calldata amount) internal {
-        if (
-            keccak256(abi.encodePacked(balanceOf[to].value)) ==
-            keccak256(bytes(""))
-        ) {
+        if (keccak256(abi.encodePacked(balanceOf[to].value)) == keccak256(bytes(""))) {
             balanceOf[to] = amount;
         } else {
             balanceOf[to] = this._add(balanceOf[to], amount);
@@ -157,10 +149,7 @@ contract DiscreteERC20 {
     /// @dev Internal function to generate an encrypted zero value using randomness
     /// @return A Ciphertext structure representing an encrypted value of zero
     function _zero() public view returns (Ciphertext memory) {
-        bytes memory rnd = abi.encodePacked(
-            block.timestamp,
-            blockhash(block.number - 1)
-        );
+        bytes memory rnd = abi.encodePacked(block.timestamp, blockhash(block.number - 1));
         return Ciphertext(paillier.encryptZero(rnd, publicKey).val);
     }
 
@@ -168,10 +157,7 @@ contract DiscreteERC20 {
     /// @param a The first encrypted value
     /// @param b The second encrypted value
     /// @return The result of the addition, represented as encrypted data
-    function _add(
-        Ciphertext calldata a,
-        Ciphertext calldata b
-    ) public view returns (Ciphertext memory) {
+    function _add(Ciphertext calldata a, Ciphertext calldata b) public view returns (Ciphertext memory) {
         return Ciphertext(paillier.add(a, b, publicKey).val);
     }
 
@@ -179,10 +165,7 @@ contract DiscreteERC20 {
     /// @param a The encrypted value to subtract from
     /// @param b The encrypted value to subtract
     /// @return The result of the subtraction, represented as encrypted data
-    function _sub(
-        Ciphertext calldata a,
-        Ciphertext calldata b
-    ) public view returns (Ciphertext memory) {
+    function _sub(Ciphertext calldata a, Ciphertext calldata b) public view returns (Ciphertext memory) {
         return Ciphertext(paillier.sub(a, b, publicKey).val);
     }
 }
