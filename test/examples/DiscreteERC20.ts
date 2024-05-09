@@ -29,7 +29,7 @@ describe('DiscreteERC20', function () {
     const [admin] = await ethers.getSigners();
 
     const Paillier = await ethers.deployContract('Paillier');
-    let add: string = await Paillier.getAddress();
+    let addr: string = await Paillier.getAddress();
 
     const { publicKey, privateKey } = await paillierBigint.generateRandomKeys(256);
     // Public key
@@ -37,7 +37,12 @@ describe('DiscreteERC20', function () {
       n: ethers.toBeHex(publicKey.n),
       g: ethers.toBeHex(publicKey.g),
     };
-    const DiscreteERC20 = await ethers.deployContract('DiscreteERC20', ['DiscreteERC20', 'D20', 18, add, pubKey]);
+    // encrypt starting balance
+    const starting_balance: Ciphertext = {
+      value: ethers.toBeHex(publicKey.encrypt(BigInt(0))),
+    };
+
+    const DiscreteERC20 = await ethers.deployContract('DiscreteERC20', ['DiscreteERC20', 'D20', 18, starting_balance, addr, pubKey]);
     return { DiscreteERC20, publicKey, privateKey };
   }
 

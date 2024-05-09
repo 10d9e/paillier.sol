@@ -40,7 +40,7 @@ library BigNum {
 
      // convert BigNum to uint
     function toUint(BigNumber memory a) internal pure returns(uint) {
-        require(a.bitlen <= 256);
+        require(a.bitlen <= 512);
         uint result;
         assembly {
             result := mload(add(a, 0x20))

@@ -69,6 +69,7 @@ contract DiscreteERC20 {
         string memory _name,
         string memory _symbol,
         uint8 _decimals,
+        Ciphertext memory _initialSupply,
         address _paillier,
         PublicKey memory _publicKey
     ) {
@@ -77,7 +78,7 @@ contract DiscreteERC20 {
         decimals = _decimals;
         paillier = Paillier(_paillier);
         publicKey = _publicKey;
-        totalSupply = _zero();
+        totalSupply = _initialSupply;
     }
 
     /// @notice Emits an event to request the balance of the sender
@@ -146,13 +147,6 @@ contract DiscreteERC20 {
     /// @param amount The amount of tokens to burn, represented as encrypted data
     function burn(address from, Ciphertext calldata amount) external {
         _burn(from, amount);
-    }
-
-    /// @dev Internal function to generate an encrypted zero value using randomness
-    /// @return A Ciphertext structure representing an encrypted value of zero
-    function _zero() public view returns (Ciphertext memory) {
-        bytes memory rnd = abi.encodePacked(block.timestamp, blockhash(block.number - 1));
-        return Ciphertext(paillier.encryptZero(rnd, publicKey).val);
     }
 
     /// @dev Internal function to add two encrypted values
