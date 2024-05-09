@@ -173,10 +173,11 @@ contract Paillier {
     }
 
     /// @notice Decrypts an encrypted value using a private key and a public key
-    /// @dev The decryption is performed as (c^lambda % n^2) % n, where lambda is the private key (c^(lambda) % n^2) * mu) % n
+    /// @dev The decryption is performed as (c^(lambda) % n^2) * mu) % n
     /// @param encValue The encrypted value in bytes
     /// @param privateKey The private key in bytes
     /// @param publicKey The public key in bytes
+    /// @param sigma The precalculated sigma value ((c^lamba % n^2) / n) in bytes, to prevent expensive bigint division on chain
     /// @return decryptedValue The decrypted value as a BigNumber
     function decrypt(
         Ciphertext calldata encValue,
@@ -190,10 +191,9 @@ contract Paillier {
         BigNumber memory mu = BigNumber(privateKey.mu, false, BigNum.bitLength(privateKey.mu));
         BigNumber memory n = BigNumber(publicKey.n, false, BigNum.bitLength(publicKey.n));
         BigNumber memory sig = BigNumber(sigma, false, BigNum.bitLength(sigma));
-
         BigNumber memory alpha = BigNum.modexp(enc_value, lambda, BigNum.pow(n, 2));
 
-        // precompute the div operation and verify the sigma
+        // verify the precomputed sigma was correct - c^lambda % n^2 / n == sigma
         require(BigNum.divVerify(alpha, n, sig), "Invalid sigma");
         return BigNum.mod(BigNum.mul(sig, mu), n);
     }
