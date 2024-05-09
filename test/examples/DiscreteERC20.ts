@@ -100,7 +100,7 @@ describe('DiscreteERC20', function () {
     expect(decryptedBalanceAlice).to.equal(975);
   });
 
-  it('should respond with the correct balance', async function () {
+  it('should respond with the correct balance, encrypted under the accounts public key', async function () {
     // Signers
     const [alice] = await ethers.getSigners();
     const alicePrivateKey = '8355bb293b8714a06b972bfe692d1bd9f24235c1f4007ae0be285d398b0bba2f';
