@@ -67,6 +67,8 @@ contract Paillier {
         BigNumber memory enc_a = BigNumber(a.value, false, BigNum.bitLength(a.value));
         BigNumber memory pub_n = BigNumber(publicKey.n, false, BigNum.bitLength(publicKey.n));
         BigNumber memory g = BigNumber(publicKey.g, false, BigNum.bitLength(publicKey.g));
+
+        // Calculate the encrypted result as enc_a * g^b % pub_n^2
         BigNumber memory enc_result = BigNum.mod(BigNum.mul(enc_a, BigNum.pow(g, b)), BigNum.pow(pub_n, 2));
         return enc_result;
     }
@@ -125,7 +127,25 @@ contract Paillier {
     ) public view returns (BigNumber memory) {
         BigNumber memory enc_value = BigNumber(a.value, false, BigNum.bitLength(a.value));
         BigNumber memory pub_n = BigNumber(publicKey.n, false, BigNum.bitLength(publicKey.n));
+
+        // Calculate the encrypted result as enc_value^b % pub_n^2
         BigNumber memory enc_result = BigNum.mod(BigNum.pow(enc_value, b), BigNum.pow(pub_n, 2));
+        return enc_result;
+    }
+
+    function mul(
+        Ciphertext calldata a,
+        Ciphertext calldata b,
+        PublicKey calldata publicKey
+    ) public view returns (BigNumber memory) {
+        BigNumber memory enc_a = BigNumber(a.value, false, BigNum.bitLength(a.value));
+        BigNumber memory enc_b = BigNumber(b.value, false, BigNum.bitLength(b.value));
+        BigNumber memory pub_n = BigNumber(publicKey.n, false, BigNum.bitLength(publicKey.n));
+
+        // Calculate the encrypted result as enc_a^enc_b * enc_b^enc_a % pub_n^2
+        BigNumber memory alpha = BigNum.modexp(enc_a, enc_b, BigNum.pow(pub_n, 2));
+        BigNumber memory beta = BigNum.modexp(enc_b, enc_a, BigNum.pow(pub_n, 2));
+        BigNumber memory enc_result = BigNum.mod(BigNum.mul(alpha, beta), BigNum.pow(pub_n, 2));
         return enc_result;
     }
 
@@ -172,12 +192,39 @@ contract Paillier {
         return enc_zero;
     }
 
+    /// @notice Encrypts a value using a random value and a public key
+    /// @dev The encryption is performed as (g^m * r^n) % n^2, where m is the value and r is the random value
+    /// @param value The value to encrypt
+    /// @param rnd The random value in bytes
+    /// @param publicKey The public key in bytes
+    /// @return enc_value The encrypted value as a BigNumber
+    function encrypt(
+        uint256 value,
+        bytes memory rnd,
+        PublicKey calldata publicKey
+    ) public view returns (BigNumber memory) {
+        BigNumber memory pub_n = BigNumber(publicKey.n, false, BigNum.bitLength(publicKey.n));
+        BigNumber memory pub_g = BigNumber(publicKey.g, false, BigNum.bitLength(publicKey.g));
+        BigNumber memory alpha = BigNum.modexp(
+            pub_g,
+            BigNumber(abi.encodePacked(value), false, 256),
+            BigNum.pow(pub_n, 2)
+        );
+        BigNumber memory beta = BigNum.modexp(
+            BigNumber(rnd, false, BigNum.bitLength(rnd)),
+            pub_n,
+            BigNum.pow(pub_n, 2)
+        );
+        BigNumber memory enc_value = BigNum.mod(BigNum.mul(alpha, beta), BigNum.pow(pub_n, 2));
+        return enc_value;
+    }
+
     /// @notice Decrypts an encrypted value using a private key and a public key
-    /// @dev The decryption is performed as (c^(lambda) % n^2) * mu) % n
+    /// @dev The decryption is performed as (((c^(lambda) % n^2) - 1) / n) * mu % n
     /// @param encValue The encrypted value in bytes
     /// @param privateKey The private key in bytes
     /// @param publicKey The public key in bytes
-    /// @param sigma The precalculated sigma value ((c^lamba % n^2) / n) in bytes, to prevent expensive bigint division on chain
+    /// @param sigma The precalculated sigma value (((c^(lambda) % n^2) - 1) / n) in bytes, to prevent expensive bigint division on chain
     /// @return decryptedValue The decrypted value as a BigNumber
     function decrypt(
         Ciphertext calldata encValue,
