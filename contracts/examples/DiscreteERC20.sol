@@ -3,12 +3,14 @@ pragma solidity ^0.8.24;
 
 import "../Paillier.sol";
 
+// Secp256k1Ciphertext struct
 struct Secp256k1Ciphertext {
     bytes iv;
     bytes ephemPublicKey;
     bytes ciphertext;
     bytes mac;
 }
+
 /// @title DiscreteERC20: An ERC20 token contract with encrypted balances using the Paillier cryptosystem
 /// @dev This contract demonstrates an example of an ERC20 token where balances are encrypted to preserve user privacy.
 contract DiscreteERC20 {

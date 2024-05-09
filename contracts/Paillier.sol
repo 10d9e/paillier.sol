@@ -44,7 +44,6 @@ contract Paillier {
         Ciphertext calldata b,
         PublicKey calldata publicKey
     ) public view returns (BigNumber memory) {
-        // Create BigNumber representations for the encrypted values and the public key
         BigNumber memory enc_a = BigNumber(a.value, false, BigNum.bitLength(a.value));
         BigNumber memory enc_b = BigNumber(b.value, false, BigNum.bitLength(b.value));
         BigNumber memory pub_n = BigNumber(publicKey.n, false, BigNum.bitLength(publicKey.n));
@@ -69,7 +68,6 @@ contract Paillier {
         BigNumber memory pub_n = BigNumber(publicKey.n, false, BigNum.bitLength(publicKey.n));
         BigNumber memory g = BigNumber(publicKey.g, false, BigNum.bitLength(publicKey.g));
         BigNumber memory enc_result = BigNum.mod(BigNum.mul(enc_a, BigNum.pow(g, b)), BigNum.pow(pub_n, 2));
-
         return enc_result;
     }
 
@@ -87,10 +85,8 @@ contract Paillier {
         BigNumber memory enc_a = BigNumber(a.value, false, BigNum.bitLength(a.value));
         BigNumber memory enc_b = BigNumber(b.value, false, BigNum.bitLength(b.value));
         BigNumber memory pub_n = BigNumber(publicKey.n, false, BigNum.bitLength(publicKey.n));
-
         BigNumber memory modulus = BigNum.pow(pub_n, 2);
         BigNumber memory neg_enc_b = BigNum.modexp(enc_b, BigNum.sub(pub_n, BigNum.one()), modulus);
-
         BigNumber memory enc_result = BigNum.mod(enc_a.mul(neg_enc_b), modulus);
         return enc_result;
     }
@@ -109,12 +105,10 @@ contract Paillier {
         BigNumber memory enc_a = BigNumber(a.value, false, BigNum.bitLength(a.value));
         BigNumber memory pub_n = BigNumber(publicKey.n, false, BigNum.bitLength(publicKey.n));
         BigNumber memory g = BigNumber(publicKey.g, false, BigNum.bitLength(publicKey.g));
-
         BigNumber memory bb = BigNumber(abi.encodePacked(b), true, 256);
         BigNumber memory inverse = BigNum.mod(bb, pub_n);
         BigNumber memory modulus = BigNum.pow(pub_n, 2);
         BigNumber memory enc_result = enc_a.mul(BigNum.modexp(g, inverse, modulus)).mod(modulus);
-
         return enc_result;
     }
 
@@ -131,13 +125,16 @@ contract Paillier {
     ) public view returns (BigNumber memory) {
         BigNumber memory enc_value = BigNumber(a.value, false, BigNum.bitLength(a.value));
         BigNumber memory pub_n = BigNumber(publicKey.n, false, BigNum.bitLength(publicKey.n));
-
-        // Calculate the encrypted result as enc_value^b % pub_n^2
         BigNumber memory enc_result = BigNum.mod(BigNum.pow(enc_value, b), BigNum.pow(pub_n, 2));
-
         return enc_result;
     }
 
+    /// @notice Divides an encrypted value by a plaintext constant
+    /// @dev The function computes Enc(a)^(n-1) % n^2 to divide Enc(a) by b
+    /// @param a The encrypted value as a Ciphertext
+    /// @param b The plaintext constant as a uint256
+    /// @param publicKey The public key as a PublicKey
+    /// @return enc_result The result of the division as a BigNumber
     function div_const(
         Ciphertext calldata a,
         uint256 b,
