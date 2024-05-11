@@ -1,3 +1,5 @@
+[![Unit Test](https://github.com/10d9e/paillier-sol/actions/workflows/test.yml/badge.svg)](https://github.com/10d9e/paillier-sol/actions/workflows/test.yml)
+
 # Paillier Solidity Smart Contract
 
 This Solidity smart contract provides functionalities for performing homomorphic encryption using the Paillier cryptosystem on the Ethereum blockchain. Homomorphic encryption allows computations to be performed on encrypted data without decrypting it first, providing privacy and security benefits.
