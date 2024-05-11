@@ -65,37 +65,6 @@ describe('Paillier', function () {
     expect(dec_sum).to.equal(3);
   });
 
-  it('should multiply 2 ciphertexts', async function () {
-
-    const { Paillier, publicKey, privateKey } = await loadFixture(fixture);
-    const a: bigint = BigInt(2);
-    const b: bigint = BigInt(5);
-    const enc_a: Ciphertext = {
-      value: ethers.toBeHex(publicKey.encrypt(a)),
-    };
-    const enc_b: Ciphertext = {
-      value: ethers.toBeHex(publicKey.encrypt(b)),
-    };
-
-    // Public key
-    const pubKey: PublicKey = {
-      n: ethers.toBeHex(publicKey.n),
-      g: ethers.toBeHex(publicKey.g),
-    };
-
-    // bit length will differ to what has been stated in this script.
-    // if using 256-bit key, bit_length will be 264 as "0x" prefix may have been factored in
-    // Now lets deploy the contract and test the addition
-    const enc_prod = await Paillier.mul(enc_a, enc_b, pubKey);
-    const enc_prod_int = bigIntConversion.hexToBigint(enc_prod[0]);
-
-    // Conversion to int for convenience
-    const dec_prod = Number(privateKey.decrypt(enc_prod_int));
-    console.log(dec_prod);
-    // We want dec_prod to equal 10
-    expect(dec_prod).to.equal(10);
-  });
-
   it('should add a ciphertext and plaintext', async function () {
     const { Paillier, publicKey, privateKey } = await loadFixture(fixture);
     const a: bigint = BigInt(1);

@@ -133,22 +133,6 @@ contract Paillier {
         return enc_result;
     }
 
-    function mul(
-        Ciphertext calldata a,
-        Ciphertext calldata b,
-        PublicKey calldata publicKey
-    ) public view returns (BigNumber memory) {
-        BigNumber memory enc_a = BigNumber(a.value, false, BigNum.bitLength(a.value));
-        BigNumber memory enc_b = BigNumber(b.value, false, BigNum.bitLength(b.value));
-        BigNumber memory pub_n = BigNumber(publicKey.n, false, BigNum.bitLength(publicKey.n));
-
-        // Calculate the encrypted result as enc_a^enc_b * enc_b^enc_a % pub_n^2
-        BigNumber memory alpha = BigNum.modexp(enc_a, enc_b, BigNum.pow(pub_n, 2));
-        BigNumber memory beta = BigNum.modexp(enc_b, enc_a, BigNum.pow(pub_n, 2));
-        BigNumber memory enc_result = BigNum.mod(BigNum.mul(alpha, beta), BigNum.pow(pub_n, 2));
-        return enc_result;
-    }
-
     /// @notice Divides an encrypted value by a plaintext constant
     /// @dev The function computes Enc(a)^(n-1) % n^2 to divide Enc(a) by b
     /// @param a The encrypted value as a Ciphertext
