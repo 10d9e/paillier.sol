@@ -38,7 +38,7 @@ contract DiscreteERC20 {
 
     /// @notice An event emitted in response to a balance request
     /// @param account Address whose balance was requested
-    /// @param balance The balance of the account (unencrypted for event)
+    /// @param balance The balance of the account, encrypted under the corresponding public key
     event ResponseBalance(address indexed account, Secp256k1Ciphertext balance);
 
     /// @dev The total supply of tokens, encrypted
@@ -88,7 +88,7 @@ contract DiscreteERC20 {
 
     /// @notice Emits an event with the response balance for a specified address
     /// @param target The address whose balance is being reported
-    /// @param balance The balance of the specified address
+    /// @param balance The balance of the specified address, encrypted under their public key
     function responseBalance(address target, Secp256k1Ciphertext calldata balance) external {
         emit ResponseBalance(target, balance);
     }
