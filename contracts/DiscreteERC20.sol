@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
-import "../Paillier.sol";
+import "./Paillier.sol";
 
 // Secp256k1Ciphertext struct
 struct Secp256k1Ciphertext {
@@ -110,6 +110,30 @@ contract DiscreteERC20 {
         }
         balanceOf[msg.sender] = this._sub(balanceOf[msg.sender], amount);
         emit Transfer(msg.sender, recipient, amount);
+        return true;
+    }
+
+    /// @notice Transfers encrypted tokens to a specified address
+    /// @param recipient The address to receive the tokens
+    /// @param amount The amount of tokens to transfer, represented as encrypted data
+    /// @return success A boolean value indicating success of the transfer
+    function transfer_proxy(
+        address sender,
+        address recipient,
+        Ciphertext calldata amount
+    ) external returns (bool success) {
+        require(
+            keccak256(abi.encodePacked(balanceOf[sender].value)) != keccak256(bytes("")),
+            "DiscreteERC20: transfer from the zero address"
+        );
+
+        if (keccak256(abi.encodePacked(balanceOf[recipient].value)) == keccak256(bytes(""))) {
+            balanceOf[recipient] = amount;
+        } else {
+            balanceOf[recipient] = this._add(balanceOf[recipient], amount);
+        }
+        balanceOf[sender] = this._sub(balanceOf[sender], amount);
+        emit Transfer(sender, recipient, amount);
         return true;
     }
 
