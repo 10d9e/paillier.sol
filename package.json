@@ -26,6 +26,8 @@
   },
   "dependencies": {
     "bigint-conversion": "^2.4.3",
-    "paillier-bigint": "^3.4.3"
+    "hardhat-circom": "^3.3.2",
+    "paillier-bigint": "^3.4.3",
+    "snarkjs": "^0.7.5"
   }
 }

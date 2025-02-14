@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { DiscreteERC20Bridge, ERC20Mock, Paillier, DiscreteERC20 } from "../typechain-types";
+import { DiscreteERC20Bridge, ERC20Mock, Paillier, DiscreteERC20, Groth16Verifier } from "../typechain-types";
 import { Signer } from "ethers";
 import * as bigIntConversion from 'bigint-conversion';
 import * as paillierBigint from 'paillier-bigint';
@@ -28,10 +28,11 @@ describe("DiscreteERC20Bridge", function () {
     let ERC20: ERC20Mock;
     let discreteERC20: DiscreteERC20;
     let paillier: Paillier;
-    let wrapper: DiscreteERC20Bridge;
+    let bridge: DiscreteERC20Bridge;
     let owner: Signer, user1: Signer, user2: Signer;
     let publicKey: paillierBigint.PublicKey;
     let privateKey: paillierBigint.PrivateKey;
+    let verifier: Groth16Verifier;
 
     beforeEach(async function () {
         [owner, user1, user2] = await ethers.getSigners();
@@ -42,6 +43,10 @@ describe("DiscreteERC20Bridge", function () {
         // Deploy Paillier
         paillier = await ethers.deployContract('Paillier');
         let addr: string = await paillier.getAddress();
+
+        // Deploy PaillierProofVerifier
+        verifier = await ethers.deployContract("Groth16Verifier");
+
 
         let keyPair = await paillierBigint.generateRandomKeys(256);
         publicKey = keyPair.publicKey;
@@ -59,26 +64,27 @@ describe("DiscreteERC20Bridge", function () {
         discreteERC20 = await ethers.deployContract('DiscreteERC20', ['DiscreteERC20', 'D20', 18, starting_balance, addr, pubKey]);
 
         // Deploy Wrapper
-        wrapper = await ethers.deployContract("DiscreteERC20Bridge", [
+        bridge = await ethers.deployContract("DiscreteERC20Bridge", [
             ERC20.getAddress(),
             discreteERC20.getAddress(),
             paillier.getAddress(),
-            pubKey
+            pubKey,
+            verifier.getAddress()
         ]);
 
         // Mint ERC20 tokens to users
         await ERC20.mint(await user1.getAddress(), ethers.parseEther("100"));
 
-        await ERC20.connect(user1).approve(wrapper.getAddress(), ethers.parseEther("100"));
+        await ERC20.connect(user1).approve(bridge.getAddress(), ethers.parseEther("100"));
     });
 
     it("should deposit tokens and mint encrypted balance", async function () {
-        await expect(wrapper.connect(user1).deposit(ethers.parseEther("10")))
-            .to.emit(wrapper, "Deposit");
+        await expect(bridge.connect(user1).deposit(ethers.parseEther("10")))
+            .to.emit(bridge, "Deposit");
     });
 
     it("should allow encrypted transfers", async function () {
-        await wrapper.connect(user1).deposit(ethers.parseEther("10"));
+        await bridge.connect(user1).deposit(ethers.parseEther("10"));
 
         // ✅ Fetch the encrypted balance of user1 after deposit
         const encryptedBalanceUser1 = bigIntConversion.hexToBigint(await discreteERC20.balanceOf(await user1.getAddress()));
@@ -92,7 +98,7 @@ describe("DiscreteERC20Bridge", function () {
         await expect(balanceUser1).to.equal(ethers.parseEther("90"));
 
         // confirm that the ERC20 balance of wrapper is 10
-        const balanceWrapper = await ERC20.balanceOf(wrapper.getAddress());
+        const balanceWrapper = await ERC20.balanceOf(bridge.getAddress());
         await expect(balanceWrapper).to.equal(ethers.parseEther("10"));
 
         const tokens: Ciphertext = {
@@ -101,8 +107,8 @@ describe("DiscreteERC20Bridge", function () {
 
         // ✅ Use the actual stored encrypted balance for transfer
         // print user2 address
-        await expect(wrapper.connect(user1).transferEncrypted(await user2.getAddress(), tokens))
-            .to.emit(wrapper, "TransferEncrypted");
+        await expect(bridge.connect(user1).transferEncrypted(await user2.getAddress(), tokens))
+            .to.emit(bridge, "TransferEncrypted");
 
         // ✅ Fetch the encrypted balance of user2 after transfer
         //const encryptedBalance2 = await wrapper.encryptedBalances(await user2.getAddress());
@@ -123,12 +129,30 @@ describe("DiscreteERC20Bridge", function () {
 
 
     it("should allow withdrawals and burn encrypted balance", async function () {
-        await wrapper.connect(user1).deposit(ethers.parseEther("10"));
+        await bridge.connect(user1).deposit(ethers.parseEther("10"));
 
         const encryptedAmount: Ciphertext = {
             value: ethers.toBeHex(publicKey.encrypt(ethers.parseEther("10"))),
         };
-        //await expect(wrapper.connect(user1).withdraw(encryptedAmount))
-        //    .to.emit(wrapper, "Withdraw");
+
+        // Generate a real proof using SnarkJS and pass it here.
+
+        const dummyProof = {
+            a: [0, 0],
+            b: [
+                [0, 0],
+                [0, 0]
+            ],
+            c: [0, 0],
+            input: [0, 0, 0]
+        };
+
+        await expect(bridge.connect(user1).withdraw(ethers.parseEther("10"), dummyProof.a,
+            dummyProof.b,
+            dummyProof.c,
+            dummyProof.input))
+            .to.emit(bridge, "Withdraw")
+            .withArgs(await user1.getAddress(), ethers.parseEther("10"));
+
     });
 });

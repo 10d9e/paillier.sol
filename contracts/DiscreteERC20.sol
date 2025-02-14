@@ -81,6 +81,10 @@ contract DiscreteERC20 {
         totalSupply = _initialSupply;
     }
 
+    function getBalance(address account) external view returns (Ciphertext memory) {
+        return balanceOf[account];
+    }
+
     /// @notice Emits an event to request the balance of the sender
     function requestBalance() external {
         emit RequestBalance(msg.sender);

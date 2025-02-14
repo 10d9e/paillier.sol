@@ -2,6 +2,8 @@ import '@nomicfoundation/hardhat-ethers';
 import '@nomicfoundation/hardhat-toolbox';
 import { HardhatUserConfig } from 'hardhat/config';
 
+//import 'hardhat-circom';
+
 require('@nomicfoundation/hardhat-chai-matchers');
 
 const mnemonic: string =
