@@ -136,7 +136,6 @@ describe("DiscreteERC20Bridge", function () {
         };
 
         // Generate a real proof using SnarkJS and pass it here.
-
         const dummyProof = {
             a: [0, 0],
             b: [
@@ -154,5 +153,56 @@ describe("DiscreteERC20Bridge", function () {
             .to.emit(bridge, "Withdraw")
             .withArgs(await user1.getAddress(), ethers.parseEther("10"));
 
+        // confirm that the ERC20 balance of user1 is 100
+        const balanceUser1 = await ERC20.balanceOf(await user1.getAddress());
+        await expect(balanceUser1).to.equal(ethers.parseEther("100"));
+
+        // confirm that the ERC20 balance of wrapper is 0
+        const balanceWrapper = await ERC20.balanceOf(bridge.getAddress());
+        await expect(balanceWrapper).to.equal(ethers.parseEther("0"));
+
+    });
+
+    // deposit, transfer, withdraw
+    it("should allow deposit, transfer, and withdraw", async function () {
+        // Deposit
+        await expect(bridge.connect(user1).deposit(ethers.parseEther("10")))
+            .to.emit(bridge, "Deposit");
+
+        // Transfer
+        const tokens: Ciphertext = {
+            value: ethers.toBeHex(publicKey.encrypt(ethers.parseEther("3"))),
+        };
+
+        await expect(bridge.connect(user1).transferEncrypted(await user2.getAddress(), tokens))
+            .to.emit(bridge, "TransferEncrypted");
+
+        // check user1 balance
+        const encryptedBalanceUser1 = bigIntConversion.hexToBigint(await discreteERC20.balanceOf(await user1.getAddress()));
+        const decryptedBalanceUser1 = BigInt(privateKey.decrypt(encryptedBalanceUser1));
+        await expect(decryptedBalanceUser1).to.equal(ethers.parseEther("7"));
+
+        // check user2 balance
+        const encryptedBalanceUser2 = bigIntConversion.hexToBigint(await discreteERC20.balanceOf(await user2.getAddress()));
+        const decryptedBalanceUser2 = BigInt(privateKey.decrypt(encryptedBalanceUser2));
+        await expect(decryptedBalanceUser2).to.equal(ethers.parseEther("3"));
+
+        // TODO: Generate a real proof using SnarkJS and pass it here.
+        const dummyProof = {
+            a: [0, 0],
+            b: [
+                [0, 0],
+                [0, 0]
+            ],
+            c: [0, 0],
+            input: [0, 0, 0]
+        };
+
+        await expect(bridge.connect(user1).withdraw(ethers.parseEther("7"), dummyProof.a,
+            dummyProof.b,
+            dummyProof.c,
+            dummyProof.input))
+            .to.emit(bridge, "Withdraw")
+            .withArgs(await user1.getAddress(), ethers.parseEther("7"));
     });
 });

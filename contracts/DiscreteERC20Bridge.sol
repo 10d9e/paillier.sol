@@ -43,11 +43,11 @@ contract DiscreteERC20Bridge {
     }
 
     function verifyProof(
-        uint256[2] calldata a,
-        uint256[2][2] calldata b,
-        uint256[2] calldata c,
-        uint256[3] calldata input
-    ) public view returns (bool) {
+        uint256[2] calldata /* a */,
+        uint256[2][2] calldata /*b */,
+        uint256[2] calldata /*c */,
+        uint256[3] calldata /*input */
+    ) public pure returns (bool) {
         // todo: integrate verifier
         return true;
         // return verifier.verifyProof(a, b, c, input);
@@ -87,9 +87,7 @@ contract DiscreteERC20Bridge {
         require(verifyProof(pok_a, pok_b, pok_c, pok_input), "zk-pok invalid");
         require(amount > 0, "Invalid amount");
         require(underlyingToken.transfer(msg.sender, amount), "Transfer failed");
-
         discreteToken.burn(msg.sender, discreteToken.getBalance(msg.sender));
-
         emit Withdraw(msg.sender, amount);
     }
 
