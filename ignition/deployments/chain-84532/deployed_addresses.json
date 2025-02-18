@@ -1,0 +1,7 @@
+{
+  "ERC20MockModule#ERC20Mock": "0xA9cc3E19734d47BB1135af2014552fD62c2C5E0e",
+  "Groth16VerifierModule#Groth16Verifier": "0x4b11e9006f4A970d3d0071222B51d65B7b79345F",
+  "PaillierModule#Paillier": "0xf599f12dCf945834Ed5758aDf36BF9cF7157E2B7",
+  "DiscreteERC20Module#DiscreteERC20": "0xe0Bd3C38FAED5ff8eFA74E8Ec8b7b33b1065ad1e",
+  "DiscreteERC20BridgeModule#DiscreteERC20Bridge": "0xB380f20D3cd76185C4A1b15f2e27a706Cf44A18b"
+}
