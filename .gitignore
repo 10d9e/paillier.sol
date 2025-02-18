@@ -148,3 +148,5 @@ node_modules
 ignition/deployments/chain-31337
 
 .vscode
+
+ignition/deployments
