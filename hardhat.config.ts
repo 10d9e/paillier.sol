@@ -2,6 +2,8 @@ import '@nomicfoundation/hardhat-ethers';
 import '@nomicfoundation/hardhat-toolbox';
 import { HardhatUserConfig } from 'hardhat/config';
 
+//import 'hardhat-circom';
+
 require('@nomicfoundation/hardhat-chai-matchers');
 
 const mnemonic: string =
@@ -16,7 +18,14 @@ const config: HardhatUserConfig = {
         mnemonic,
         path: "m/44'/60'/0'/0",
       },
+      gasPrice: 1000000000,
     },
+    // for testnet
+    //'sepolia': {
+    //  url: 'https://sepolia.base.org',
+    //  accounts: [process.env.WALLET_KEY as string],
+    //gasPrice: 1000000000,
+    //},
   },
 };
 export default config;
