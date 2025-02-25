@@ -87,7 +87,13 @@ contract DiscreteERC20Bridge {
         require(verifyProof(pok_a, pok_b, pok_c, pok_input), "zk-pok invalid");
         require(amount > 0, "Invalid amount");
         require(underlyingToken.transfer(msg.sender, amount), "Transfer failed");
-        discreteToken.burn(msg.sender, discreteToken.getBalance(msg.sender));
+
+        bytes memory randomValue = _generateRandomValue();
+        BigNumber memory encryptedAmount = paillier.encrypt(amount, randomValue, publicKey);
+        Ciphertext memory ciphertext = Ciphertext(encryptedAmount.val);
+        discreteToken.burn(msg.sender, ciphertext);
+
+        //discreteToken.burn(msg.sender, discreteToken.getBalance(msg.sender));
         emit Withdraw(msg.sender, amount);
     }
 

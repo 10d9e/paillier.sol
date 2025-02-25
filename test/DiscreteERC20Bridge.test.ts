@@ -205,4 +205,53 @@ describe("DiscreteERC20Bridge", function () {
             .to.emit(bridge, "Withdraw")
             .withArgs(await user1.getAddress(), ethers.parseEther("7"));
     });
+
+
+    it("should allow deposit, transfer, and partial withdraw", async function () {
+        // Deposit
+        await expect(bridge.connect(user1).deposit(ethers.parseEther("10")))
+            .to.emit(bridge, "Deposit");
+
+        // Transfer
+        const tokens: Ciphertext = {
+            value: ethers.toBeHex(publicKey.encrypt(ethers.parseEther("3"))),
+        };
+
+        await expect(bridge.connect(user1).transferEncrypted(await user2.getAddress(), tokens))
+            .to.emit(bridge, "TransferEncrypted");
+
+        // check user1 balance
+        const encryptedBalanceUser1 = bigIntConversion.hexToBigint(await discreteERC20.balanceOf(await user1.getAddress()));
+        const decryptedBalanceUser1 = BigInt(privateKey.decrypt(encryptedBalanceUser1));
+        await expect(decryptedBalanceUser1).to.equal(ethers.parseEther("7"));
+
+        // check user2 balance
+        const encryptedBalanceUser2 = bigIntConversion.hexToBigint(await discreteERC20.balanceOf(await user2.getAddress()));
+        const decryptedBalanceUser2 = BigInt(privateKey.decrypt(encryptedBalanceUser2));
+        await expect(decryptedBalanceUser2).to.equal(ethers.parseEther("3"));
+
+        // TODO: Generate a real proof using SnarkJS and pass it here.
+        const dummyProof = {
+            a: [0, 0],
+            b: [
+                [0, 0],
+                [0, 0]
+            ],
+            c: [0, 0],
+            input: [0, 0, 0]
+        };
+
+        await expect(bridge.connect(user1).withdraw(ethers.parseEther("5"), dummyProof.a,
+            dummyProof.b,
+            dummyProof.c,
+            dummyProof.input))
+            .to.emit(bridge, "Withdraw")
+            .withArgs(await user1.getAddress(), ethers.parseEther("5"));
+
+        // check user1 balance
+        const encryptedBalanceUser1a = bigIntConversion.hexToBigint(await discreteERC20.balanceOf(await user1.getAddress()));
+        const decryptedBalanceUser1a = BigInt(privateKey.decrypt(encryptedBalanceUser1a));
+        await expect(decryptedBalanceUser1a).to.equal(ethers.parseEther("2"));
+
+    });
 });

@@ -21,11 +21,11 @@ const config: HardhatUserConfig = {
       gasPrice: 1000000000,
     },
     // for testnet
-    'sepolia': {
-      url: 'https://sepolia.base.org',
-      accounts: [process.env.WALLET_KEY as string],
-      //gasPrice: 1000000000,
-    },
+    //'sepolia': {
+    //  url: 'https://sepolia.base.org',
+    //  accounts: [process.env.WALLET_KEY as string],
+    //gasPrice: 1000000000,
+    //},
   },
 };
 export default config;
